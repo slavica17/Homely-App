@@ -8,7 +8,7 @@ import {
   TextField,
 } from "@mui/material";
 import { useState } from "react";
-import { createProperty } from "@/data/properties";
+import { createProperty, uploadPropertyImages } from "@/data/properties";
 
 const PropertyDialog = ({ onClose, onCreated }) => {
   const [title, setTitle] = useState("");
@@ -25,6 +25,7 @@ const PropertyDialog = ({ onClose, onCreated }) => {
   const [type, setType] = useState("STAN");
 
   const [saving, setSaving] = useState(false);
+  const [images, setImages] = useState([]);
 
   const validateInput = () => {
     let hasErrors = false;
@@ -45,6 +46,10 @@ const PropertyDialog = ({ onClose, onCreated }) => {
     return hasErrors;
   };
 
+  const handleFiles = (e) => {
+    setImages(Array.from(e.target.files));
+  };
+
   const handleSave = async () => {
     if (validateInput()) {
       return;
@@ -61,6 +66,9 @@ const PropertyDialog = ({ onClose, onCreated }) => {
       });
 
       if (result.ok) {
+        if (result.data && result.data.id && images.length > 0) {
+          await uploadPropertyImages(result.data.id, images);
+        }
         onCreated();
         onClose();
       }
@@ -126,6 +134,15 @@ const PropertyDialog = ({ onClose, onCreated }) => {
           <MenuItem value="KUCA">House</MenuItem>
           <MenuItem value="SOBA">Room</MenuItem>
         </TextField>
+
+        <Button
+          component="label"
+          variant="outlined"
+          sx={{ textTransform: "none", color: "#555555", borderColor: "#cccccc" }}
+        >
+          {images.length > 0 ? `${images.length} image(s) selected` : "Choose images"}
+          <input type="file" hidden multiple accept="image/*" onChange={handleFiles} />
+        </Button>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} sx={{ textTransform: "none", color: "#666666" }}>

@@ -32,3 +32,29 @@ export const deleteProperty = async (id) => {
   });
   return { ok: response.ok };
 };
+
+export const uploadPropertyImages = async (propertyId, files) => {
+  const formData = new FormData();
+  for (let i = 0; i < files.length; i++) {
+    formData.append("images", files[i]);
+  }
+
+  const response = await fetch(
+    `http://localhost:8080/api/properties/${propertyId}/images`,
+    {
+      method: "POST",
+      headers: authHeader(),
+      body: formData,
+    }
+  );
+  return { ok: response.ok };
+};
+
+export const getProperty = async (id) => {
+  const response = await fetch(`http://localhost:8080/api/properties/${id}`);
+  if (response.ok) {
+    const data = await response.json();
+    return { ok: true, data };
+  }
+  return { ok: false, data: null };
+};

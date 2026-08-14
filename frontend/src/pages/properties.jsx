@@ -154,7 +154,22 @@ const Properties = () => {
         ) : (
           <Grid>
             {properties.map((p) => (
-              <Card key={p.id} sx={{ borderRadius: 3, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+              <Card
+                key={p.id}
+                onClick={() => navigate(`/properties/${p.id}`)}
+                sx={{
+                  borderRadius: 3,
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+                  cursor: "pointer",
+                }}
+              >
+                {p.images && p.images.length > 0 && (
+                  <img
+                    src={"http://localhost:8080" + p.images[0]}
+                    alt={p.title}
+                    style={{ width: "100%", height: 160, objectFit: "cover" }}
+                  />
+                )}
                 <CardContent>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <Typography sx={{ fontSize: 18, fontWeight: 700 }}>{p.title}</Typography>
@@ -166,9 +181,7 @@ const Properties = () => {
                     <Typography sx={{ fontSize: 14 }}>{p.location}</Typography>
                   </div>
 
-                  <Typography sx={{
-                    fontSize: 13, color: "#777777", mt: 1, minHeight: 40, textAlign: "justify"
-                  }}>
+                  <Typography sx={{ fontSize: 13, color: "#777777", mt: 1, minHeight: 40, textAlign: "justify" }}>
                     {p.description || "No description."}
                   </Typography>
 
@@ -176,19 +189,31 @@ const Properties = () => {
                     €{p.price}
                   </Typography>
 
-                  <Typography sx={{ fontSize: 12, color: "#aaaaaa", mt: 1 }}>
-                    Owner: {p.ownerUsername}
-                  </Typography>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginTop: 8,
+                    }}
+                  >
+                    <Typography sx={{ fontSize: 12, color: "#aaaaaa" }}>
+                      Owner: {p.ownerUsername}
+                    </Typography>
 
-                  {p.ownerUsername === username && (
-                    <Button
-                      size="small"
-                      onClick={() => handleDelete(p.id)}
-                      sx={{ textTransform: "none", color: "#d32f2f", mt: 1, pl: 0 }}
-                    >
-                      Delete
-                    </Button>
-                  )}
+                    {p.ownerUsername === username && (
+                      <Button
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(p.id);
+                        }}
+                        sx={{ textTransform: "none", color: "#d32f2f", pl: 0, minWidth: 0 }}
+                      >
+                        Delete
+                      </Button>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             ))}

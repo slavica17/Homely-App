@@ -11,6 +11,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import com.diplomski.nekretnine.model.PropertyImage;
+import com.diplomski.nekretnine.repository.PropertyImageRep;
+import com.diplomski.nekretnine.security.FileStorageService;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,10 +25,15 @@ public class PropertyController {
 
   private final PropertyRep propertyRep;
   private final UserRep userRep;
+  private final PropertyImageRep imageRep;
+  private final FileStorageService fileStorageService;
 
-  public PropertyController(PropertyRep propertyRep, UserRep userRep) {
+  public PropertyController(PropertyRep propertyRep, UserRep userRep,
+      PropertyImageRep imageRep, FileStorageService fileStorageService) {
     this.propertyRep = propertyRep;
     this.userRep = userRep;
+    this.imageRep = imageRep;
+    this.fileStorageService = fileStorageService;
   }
 
   @GetMapping
@@ -100,4 +109,33 @@ public class PropertyController {
     propertyRep.deleteById(id);
     return ResponseEntity.ok("Property deleted.");
   }
+
+  // Dodavanje slika na oglas (samo vlasnik svog oglasa)
+  @PostMapping("/{id}/images")
+  public ResponseEntity<?> uploadImages(@PathVariable Long id,
+      @RequestParam("images") MultipartFile[] files,
+      Authentication auth) {
+    Optional<Property> optional = propertyRep.findById(id);
+    if (optional.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Property not found.");
+    }
+    Property property = optional.get();
+
+    if (!property.getOwner().getUsername().equals(auth.getName())) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not your property.");
+    }
+
+    for (MultipartFile file : files) {
+      if (file != null && !file.isEmpty()) {
+        String path = fileStorageService.store(file);
+        PropertyImage image = new PropertyImage();
+        image.setPath(path);
+        image.setProperty(property);
+        imageRep.save(image);
+      }
+    }
+
+    return ResponseEntity.ok("Images uploaded.");
+  }
+
 }

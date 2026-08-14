@@ -36,4 +36,7 @@ public class Property {
     @ManyToOne
     @JoinColumn(name = "owner_id")
     private User owner;
+
+    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<PropertyImage> images = new java.util.ArrayList<>();
 }
