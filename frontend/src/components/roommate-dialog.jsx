@@ -1,0 +1,150 @@
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  MenuItem,
+  TextField,
+} from "@mui/material";
+import { useState } from "react";
+import { createRoommateAd, uploadRoommateImages } from "@/data/roommates";
+
+const RoommateDialog = ({ onClose, onCreated }) => {
+  const [title, setTitle] = useState("");
+  const [titleError, setTitleError] = useState("");
+
+  const [description, setDescription] = useState("");
+
+  const [location, setLocation] = useState("");
+  const [locationError, setLocationError] = useState("");
+
+  const [price, setPrice] = useState("");
+
+  const [adType, setAdType] = useState("NUDIM");
+
+  const [saving, setSaving] = useState(false);
+  const [images, setImages] = useState([]);
+
+  const validateInput = () => {
+    let hasErrors = false;
+    if (!title) {
+      setTitleError("Title is required");
+      hasErrors = true;
+    }
+    if (!location) {
+      setLocationError("Location is required");
+      hasErrors = true;
+    }
+    return hasErrors;
+  };
+
+  const handleFiles = (e) => {
+    setImages(Array.from(e.target.files));
+  };
+
+  const handleSave = async () => {
+    if (validateInput()) {
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const result = await createRoommateAd({
+        title,
+        description,
+        location,
+        price: price ? Number(price) : null,
+        adType,
+      });
+
+      if (result.ok) {
+        if (result.data && result.data.id && images.length > 0) {
+          await uploadRoommateImages(result.data.id, images);
+        }
+        onCreated();
+        onClose();
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open onClose={onClose}>
+      <DialogTitle>New roommate ad</DialogTitle>
+      <DialogContent sx={{ width: 400, display: "flex", flexDirection: "column", rowGap: 2, mt: 1 }}>
+        <TextField
+          select
+          label="Ad type"
+          value={adType}
+          size="small"
+          onChange={(e) => setAdType(e.target.value)}
+        >
+          <MenuItem value="NUDIM">I'm offering a place (looking for a roommate)</MenuItem>
+          <MenuItem value="TRAZIM">I'm looking for a place / to move in</MenuItem>
+        </TextField>
+        <TextField
+          label="Title"
+          value={title}
+          error={Boolean(titleError)}
+          helperText={titleError}
+          size="small"
+          onChange={(e) => {
+            setTitle(e.target.value);
+            setTitleError("");
+          }}
+        />
+        <TextField
+          label="Description"
+          value={description}
+          multiline
+          rows={3}
+          size="small"
+          onChange={(e) => setDescription(e.target.value)}
+        />
+        <TextField
+          label="Location"
+          value={location}
+          error={Boolean(locationError)}
+          helperText={locationError}
+          size="small"
+          onChange={(e) => {
+            setLocation(e.target.value);
+            setLocationError("");
+          }}
+        />
+        <TextField
+          label="Price (€) — optional"
+          type="number"
+          value={price}
+          size="small"
+          onChange={(e) => setPrice(e.target.value)}
+        />
+        <Button
+          component="label"
+          variant="outlined"
+          sx={{ textTransform: "none", color: "#555555", borderColor: "#cccccc" }}
+        >
+          {images.length > 0 ? `${images.length} image(s) selected` : "Choose images"}
+          <input type="file" hidden multiple accept="image/*" onChange={handleFiles} />
+        </Button>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} sx={{ textTransform: "none", color: "#666666" }}>
+          Cancel
+        </Button>
+        <Button
+          variant="contained"
+          disabled={saving}
+          onClick={handleSave}
+          sx={{ textTransform: "none", backgroundColor: "#2b2b2b", "&:hover": { backgroundColor: "#000000" } }}
+        >
+          Save
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+export default RoommateDialog;

@@ -6,11 +6,14 @@ import {
   Chip,
   CircularProgress,
   GlobalStyles,
+  MenuItem,
+  TextField,
   Typography,
 } from "@mui/material";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import AddIcon from "@mui/icons-material/Add";
 import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
+import SearchIcon from "@mui/icons-material/Search";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { getProperties, deleteProperty } from "@/data/properties";
@@ -46,7 +49,19 @@ const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
+`;
+
+const Filters = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 28px;
+  background-color: #ffffff;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
 `;
 
 const Grid = styled.div`
@@ -60,6 +75,11 @@ const Properties = () => {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState("ALL");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [sortBy, setSortBy] = useState("none");
 
   const role = localStorage.getItem("role");
   const username = localStorage.getItem("username");
@@ -97,6 +117,24 @@ const Properties = () => {
     return t;
   };
 
+  let visibleProperties = properties.filter((p) => {
+    const matchesSearch =
+      p.title.toLowerCase().includes(search.toLowerCase()) ||
+      p.location.toLowerCase().includes(search.toLowerCase());
+
+    const matchesType = typeFilter === "ALL" || p.type === typeFilter;
+
+    const matchesPrice = !maxPrice || p.price <= Number(maxPrice);
+
+    return matchesSearch && matchesType && matchesPrice;
+  });
+
+  if (sortBy === "priceAsc") {
+    visibleProperties = [...visibleProperties].sort((a, b) => a.price - b.price);
+  } else if (sortBy === "priceDesc") {
+    visibleProperties = [...visibleProperties].sort((a, b) => b.price - a.price);
+  }
+
   return (
     <Page>
       <GlobalStyles
@@ -111,14 +149,39 @@ const Properties = () => {
           <HomeOutlinedIcon sx={{ color: "#555555" }} />
           Homely
         </Logo>
+
         {isLoggedIn ? (
-          <Button
-            variant="outlined"
-            onClick={handleLogout}
-            sx={{ color: "#555555", borderColor: "#bdbdbd", textTransform: "none" }}
-          >
-            Log out
-          </Button>
+          <div style={{ display: "flex", columnGap: 10, alignItems: "center" }}>
+            <Button
+              onClick={() => navigate("/roommates")}
+              sx={{ color: "#555555", textTransform: "none" }}
+            >
+              Roommates
+            </Button>
+            {role === "STANAR" && (
+              <Button
+                onClick={() => navigate("/my-reservations")}
+                sx={{ color: "#555555", textTransform: "none" }}
+              >
+                My reservations
+              </Button>
+            )}
+            {role === "VLASNIK" && (
+              <Button
+                onClick={() => navigate("/reservation-requests")}
+                sx={{ color: "#555555", textTransform: "none" }}
+              >
+                Requests
+              </Button>
+            )}
+            <Button
+              variant="outlined"
+              onClick={handleLogout}
+              sx={{ color: "#555555", borderColor: "#bdbdbd", textTransform: "none" }}
+            >
+              Log out
+            </Button>
+          </div>
         ) : (
           <Button
             variant="contained"
@@ -147,13 +210,61 @@ const Properties = () => {
           )}
         </Header>
 
+        <Filters>
+          <TextField
+            placeholder="Search by title or location"
+            value={search}
+            size="small"
+            onChange={(e) => setSearch(e.target.value)}
+            sx={{ flex: 1, minWidth: 220 }}
+            slotProps={{
+              input: {
+                startAdornment: <SearchIcon sx={{ color: "#aaaaaa", mr: 1 }} />,
+              },
+            }}
+          />
+          <TextField
+            select
+            label="Type"
+            value={typeFilter}
+            size="small"
+            onChange={(e) => setTypeFilter(e.target.value)}
+            sx={{ minWidth: 140 }}
+          >
+            <MenuItem value="ALL">All types</MenuItem>
+            <MenuItem value="STAN">Apartment</MenuItem>
+            <MenuItem value="KUCA">House</MenuItem>
+            <MenuItem value="SOBA">Room</MenuItem>
+          </TextField>
+          <TextField
+            label="Max price (€)"
+            type="number"
+            value={maxPrice}
+            size="small"
+            onChange={(e) => setMaxPrice(e.target.value)}
+            sx={{ minWidth: 140 }}
+          />
+          <TextField
+            select
+            label="Sort by"
+            value={sortBy}
+            size="small"
+            onChange={(e) => setSortBy(e.target.value)}
+            sx={{ minWidth: 160 }}
+          >
+            <MenuItem value="none">Default</MenuItem>
+            <MenuItem value="priceAsc">Price: low to high</MenuItem>
+            <MenuItem value="priceDesc">Price: high to low</MenuItem>
+          </TextField>
+        </Filters>
+
         {loading ? (
           <CircularProgress />
-        ) : properties.length === 0 ? (
-          <Typography sx={{ color: "#888888" }}>No properties yet.</Typography>
+        ) : visibleProperties.length === 0 ? (
+          <Typography sx={{ color: "#888888" }}>No properties match your search.</Typography>
         ) : (
           <Grid>
-            {properties.map((p) => (
+            {visibleProperties.map((p) => (
               <Card
                 key={p.id}
                 onClick={() => navigate(`/properties/${p.id}`)}

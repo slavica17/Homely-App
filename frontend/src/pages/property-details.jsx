@@ -12,6 +12,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { getProperty } from "@/data/properties";
+import ReservationDialog from "@/components/reservation-dialog";
 
 const Page = styled.div`
   min-height: 100vh;
@@ -79,6 +80,10 @@ const PropertyDetails = () => {
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [reserveOpen, setReserveOpen] = useState(false);
+
+  const role = localStorage.getItem("role");
+  const isLoggedIn = Boolean(localStorage.getItem("token"));
 
   useEffect(() => {
     const load = async () => {
@@ -148,10 +153,7 @@ const PropertyDetails = () => {
       <Content>
         {images.length > 0 ? (
           <>
-            <MainImage
-              src={baseUrl + images[selectedImage]}
-              alt={property.title}
-            />
+            <MainImage src={baseUrl + images[selectedImage]} alt={property.title} />
             {images.length > 1 && (
               <Thumbs>
                 {images.map((img, index) => (
@@ -210,8 +212,28 @@ const PropertyDetails = () => {
             size="small"
             sx={{ mt: 2, backgroundColor: property.available ? "#e0f0e0" : "#ffe0e0" }}
           />
+
+          {isLoggedIn && role === "STANAR" && property.available && (
+            <div style={{ marginTop: 24 }}>
+              <Button
+                variant="contained"
+                onClick={() => setReserveOpen(true)}
+                sx={{ backgroundColor: "#2b2b2b", textTransform: "none", "&:hover": { backgroundColor: "#000000" } }}
+              >
+                Reserve
+              </Button>
+            </div>
+          )}
         </InfoCard>
       </Content>
+
+      {reserveOpen && (
+        <ReservationDialog
+          propertyId={property.id}
+          propertyTitle={property.title}
+          onClose={() => setReserveOpen(false)}
+        />
+      )}
     </Page>
   );
 };
