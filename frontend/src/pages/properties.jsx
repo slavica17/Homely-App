@@ -75,6 +75,7 @@ const Properties = () => {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState(null);
 
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("ALL");
@@ -121,11 +122,8 @@ const Properties = () => {
     const matchesSearch =
       p.title.toLowerCase().includes(search.toLowerCase()) ||
       p.location.toLowerCase().includes(search.toLowerCase());
-
     const matchesType = typeFilter === "ALL" || p.type === typeFilter;
-
     const matchesPrice = !maxPrice || p.price <= Number(maxPrice);
-
     return matchesSearch && matchesType && matchesPrice;
   });
 
@@ -149,7 +147,6 @@ const Properties = () => {
           <HomeOutlinedIcon sx={{ color: "#555555" }} />
           Homely
         </Logo>
-
         {isLoggedIn ? (
           <div style={{ display: "flex", columnGap: 10, alignItems: "center" }}>
             <Button
@@ -313,16 +310,28 @@ const Properties = () => {
                     </Typography>
 
                     {p.ownerUsername === username && (
-                      <Button
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(p.id);
-                        }}
-                        sx={{ textTransform: "none", color: "#d32f2f", pl: 0, minWidth: 0 }}
-                      >
-                        Delete
-                      </Button>
+                      <div style={{ display: "flex", columnGap: 8 }}>
+                        <Button
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditing(p);
+                          }}
+                          sx={{ textTransform: "none", color: "#555555", pl: 0, minWidth: 0 }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(p.id);
+                          }}
+                          sx={{ textTransform: "none", color: "#d32f2f", pl: 0, minWidth: 0 }}
+                        >
+                          Delete
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </CardContent>
@@ -335,6 +344,14 @@ const Properties = () => {
       {dialogOpen && (
         <PropertyDialog
           onClose={() => setDialogOpen(false)}
+          onCreated={loadProperties}
+        />
+      )}
+
+      {editing && (
+        <PropertyDialog
+          existing={editing}
+          onClose={() => setEditing(null)}
           onCreated={loadProperties}
         />
       )}

@@ -17,6 +17,7 @@ public class RoommateAdView {
   private Double price;
   private String adType;
   private String authorUsername;
+  private String authorEmail;
   private List<String> images;
 
   public RoommateAdView(RoommateAd ad) {
@@ -28,6 +29,7 @@ public class RoommateAdView {
     this.adType = ad.getAdType().name();
     if (ad.getAuthor() != null) {
       this.authorUsername = ad.getAuthor().getUsername();
+      this.authorEmail = ad.getAuthor().getEmail();
     }
     this.images = ad.getImages().stream()
         .map(img -> img.getPath())

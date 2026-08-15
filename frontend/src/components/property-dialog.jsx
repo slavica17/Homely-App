@@ -8,21 +8,23 @@ import {
   TextField,
 } from "@mui/material";
 import { useState } from "react";
-import { createProperty, uploadPropertyImages } from "@/data/properties";
+import { createProperty, updateProperty, uploadPropertyImages } from "@/data/properties";
 
-const PropertyDialog = ({ onClose, onCreated }) => {
-  const [title, setTitle] = useState("");
+const PropertyDialog = ({ onClose, onCreated, existing }) => {
+  const isEdit = Boolean(existing);
+
+  const [title, setTitle] = useState(existing ? existing.title : "");
   const [titleError, setTitleError] = useState("");
 
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState(existing ? existing.description || "" : "");
 
-  const [location, setLocation] = useState("");
+  const [location, setLocation] = useState(existing ? existing.location : "");
   const [locationError, setLocationError] = useState("");
 
-  const [price, setPrice] = useState("");
+  const [price, setPrice] = useState(existing ? existing.price : "");
   const [priceError, setPriceError] = useState("");
 
-  const [type, setType] = useState("STAN");
+  const [type, setType] = useState(existing ? existing.type : "STAN");
 
   const [saving, setSaving] = useState(false);
   const [images, setImages] = useState([]);
@@ -57,17 +59,25 @@ const PropertyDialog = ({ onClose, onCreated }) => {
 
     try {
       setSaving(true);
-      const result = await createProperty({
+      const payload = {
         title,
         description,
         location,
         price: Number(price),
         type,
-      });
+      };
+
+      let result;
+      if (isEdit) {
+        result = await updateProperty(existing.id, payload);
+      } else {
+        result = await createProperty(payload);
+      }
 
       if (result.ok) {
-        if (result.data && result.data.id && images.length > 0) {
-          await uploadPropertyImages(result.data.id, images);
+        const propertyId = isEdit ? existing.id : result.data && result.data.id;
+        if (propertyId && images.length > 0) {
+          await uploadPropertyImages(propertyId, images);
         }
         onCreated();
         onClose();
@@ -79,7 +89,7 @@ const PropertyDialog = ({ onClose, onCreated }) => {
 
   return (
     <Dialog open onClose={onClose}>
-      <DialogTitle>New property</DialogTitle>
+      <DialogTitle>{isEdit ? "Edit property" : "New property"}</DialogTitle>
       <DialogContent sx={{ width: 400, display: "flex", flexDirection: "column", rowGap: 2, mt: 1 }}>
         <TextField
           label="Title"
@@ -140,7 +150,11 @@ const PropertyDialog = ({ onClose, onCreated }) => {
           variant="outlined"
           sx={{ textTransform: "none", color: "#555555", borderColor: "#cccccc" }}
         >
-          {images.length > 0 ? `${images.length} image(s) selected` : "Choose images"}
+          {images.length > 0
+            ? `${images.length} image(s) selected`
+            : isEdit
+            ? "Add more images"
+            : "Choose images"}
           <input type="file" hidden multiple accept="image/*" onChange={handleFiles} />
         </Button>
       </DialogContent>

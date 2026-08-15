@@ -12,6 +12,14 @@ export const getProperties = async () => {
   return { ok: false, data: [] };
 };
 
+export const getProperty = async (id) => {
+  const response = await fetch(`http://localhost:8080/api/properties/${id}`);
+  if (response.ok) {
+    return { ok: true, data: await response.json() };
+  }
+  return { ok: false, data: null };
+};
+
 export const createProperty = async (property) => {
   const response = await fetch("http://localhost:8080/api/properties", {
     method: "POST",
@@ -25,12 +33,17 @@ export const createProperty = async (property) => {
   return { ok: response.ok, data };
 };
 
-export const deleteProperty = async (id) => {
+export const updateProperty = async (id, property) => {
   const response = await fetch(`http://localhost:8080/api/properties/${id}`, {
-    method: "DELETE",
-    headers: authHeader(),
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeader(),
+    },
+    body: JSON.stringify(property),
   });
-  return { ok: response.ok };
+  const data = await response.json().catch(() => null);
+  return { ok: response.ok, data };
 };
 
 export const uploadPropertyImages = async (propertyId, files) => {
@@ -50,11 +63,10 @@ export const uploadPropertyImages = async (propertyId, files) => {
   return { ok: response.ok };
 };
 
-export const getProperty = async (id) => {
-  const response = await fetch(`http://localhost:8080/api/properties/${id}`);
-  if (response.ok) {
-    const data = await response.json();
-    return { ok: true, data };
-  }
-  return { ok: false, data: null };
+export const deleteProperty = async (id) => {
+  const response = await fetch(`http://localhost:8080/api/properties/${id}`, {
+    method: "DELETE",
+    headers: authHeader(),
+  });
+  return { ok: response.ok };
 };

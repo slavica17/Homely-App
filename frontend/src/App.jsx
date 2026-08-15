@@ -7,6 +7,7 @@ import PropertyDetails from "@/pages/property-details";
 import MyReservations from "@/pages/my-reservations";
 import ReservationRequests from "@/pages/reservation-requests";
 import Roommates from "@/pages/roommates";
+import RoommateDetails from "@/pages/roommate-details";
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
         <Route path="/my-reservations" element={<MyReservations />} />
         <Route path="/reservation-requests" element={<ReservationRequests />} />
         <Route path="/roommates" element={<Roommates />} />
+        <Route path="/roommates/:id" element={<RoommateDetails />} />
       </Routes>
     </BrowserRouter>
   );
