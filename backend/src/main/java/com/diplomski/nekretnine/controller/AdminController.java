@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.diplomski.nekretnine.dto.PropertyView;
 import com.diplomski.nekretnine.repository.PropertyRep;
+import com.diplomski.nekretnine.service.EmailService;
+import com.diplomski.nekretnine.model.Property;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,10 +21,12 @@ public class AdminController {
 
   private final UserRep userRep;
   private final PropertyRep propertyRep;
+  private final EmailService emailService;
 
-  public AdminController(UserRep userRep, PropertyRep propertyRep) {
+  public AdminController(UserRep userRep, PropertyRep propertyRep, EmailService emailService) {
     this.userRep = userRep;
     this.propertyRep = propertyRep;
+    this.emailService = emailService;
   }
 
   @GetMapping("/users")
@@ -62,6 +66,14 @@ public class AdminController {
     User user = optionalUser.get();
     user.setBlocked(!user.isBlocked());
     userRep.save(user);
+    if (user.isBlocked() && user.getEmail() != null) {
+      emailService.sendEmail(
+          user.getEmail(),
+          "Account blocked - Homely",
+          "Hello " + user.getFirstName() + ",\n\n" +
+              "Your Homely account has been blocked by an administrator.\n\n" +
+              "If you believe this is a mistake, please contact support.");
+    }
     return ResponseEntity.ok(user.isBlocked() ? "User blocked." : "User unblocked.");
   }
 
@@ -84,9 +96,23 @@ public class AdminController {
 
   @DeleteMapping("/properties/{id}")
   public ResponseEntity<String> deleteProperty(@PathVariable Long id) {
-    if (!propertyRep.existsById(id)) {
+    Optional<Property> optional = propertyRep.findById(id);
+    if (optional.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Property not found.");
     }
+    Property property = optional.get();
+
+    // mejl vlasniku pre uklanjanja oglasa
+    User owner = property.getOwner();
+    if (owner != null && owner.getEmail() != null) {
+      emailService.sendEmail(
+          owner.getEmail(),
+          "Property removed - Homely",
+          "Hello " + owner.getFirstName() + ",\n\n" +
+              "Your property \"" + property.getTitle() +
+              "\" has been removed by an administrator.");
+    }
+
     propertyRep.deleteById(id);
     return ResponseEntity.ok("Property deleted.");
   }

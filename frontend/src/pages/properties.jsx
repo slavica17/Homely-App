@@ -268,7 +268,7 @@ const Properties = () => {
             onChange={(e) => setMaxPrice(e.target.value)}
             sx={{ minWidth: 140 }}
           />
-          <TextField
+         <TextField
             select
             label="Sort by"
             value={sortBy}
@@ -279,6 +279,8 @@ const Properties = () => {
             <MenuItem value="none">Default</MenuItem>
             <MenuItem value="priceAsc">Price: low to high</MenuItem>
             <MenuItem value="priceDesc">Price: high to low</MenuItem>
+            <MenuItem value="newest">Newest first</MenuItem>
+            <MenuItem value="oldest">Oldest first</MenuItem>
           </TextField>
         </Filters>
 

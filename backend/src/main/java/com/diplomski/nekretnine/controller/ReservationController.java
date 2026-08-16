@@ -9,6 +9,7 @@ import com.diplomski.nekretnine.model.User;
 import com.diplomski.nekretnine.repository.PropertyRep;
 import com.diplomski.nekretnine.repository.ReservationRep;
 import com.diplomski.nekretnine.repository.UserRep;
+import com.diplomski.nekretnine.service.EmailService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,13 +26,17 @@ public class ReservationController {
   private final ReservationRep reservationRep;
   private final PropertyRep propertyRep;
   private final UserRep userRep;
+  private final EmailService emailService;
 
-  public ReservationController(ReservationRep reservationRep, PropertyRep propertyRep, UserRep userRep) {
+  public ReservationController(ReservationRep reservationRep, PropertyRep propertyRep,
+      UserRep userRep, EmailService emailService) {
     this.reservationRep = reservationRep;
     this.propertyRep = propertyRep;
     this.userRep = userRep;
+    this.emailService = emailService;
   }
 
+  // Stanar šalje zahtev za rezervaciju
   @PostMapping
   public ResponseEntity<?> create(@Valid @RequestBody ReservationReq request, Authentication auth) {
     User tenant = userRep.findByUsername(auth.getName()).orElse(null);
@@ -57,9 +62,24 @@ public class ReservationController {
     reservation.setStatus(ReservationStatus.PENDING);
 
     reservationRep.save(reservation);
+
+    // mejl vlasniku da je stigao novi zahtev
+    User owner = property.getOwner();
+    if (owner != null && owner.getEmail() != null) {
+      emailService.sendEmail(
+          owner.getEmail(),
+          "New reservation request - Homely",
+          "Hello " + owner.getFirstName() + ",\n\n" +
+              tenant.getUsername() + " has requested to reserve your property \"" +
+              property.getTitle() + "\" from " + request.getStartDate() +
+              " to " + request.getEndDate() + ".\n\n" +
+              "Log in to Homely to accept or reject the request.");
+    }
+
     return ResponseEntity.status(HttpStatus.CREATED).body(new ReservationView(reservation));
   }
 
+  // Moje rezervacije (stanar)
   @GetMapping("/my")
   public List<ReservationView> myReservations(Authentication auth) {
     User tenant = userRep.findByUsername(auth.getName()).orElseThrow();
@@ -68,6 +88,7 @@ public class ReservationController {
         .toList();
   }
 
+  // Zahtevi koji su stigli meni (vlasnik)
   @GetMapping("/received")
   public List<ReservationView> receivedReservations(Authentication auth) {
     User owner = userRep.findByUsername(auth.getName()).orElseThrow();
@@ -76,6 +97,7 @@ public class ReservationController {
         .toList();
   }
 
+  // Vlasnik prihvata/odbija
   @PutMapping("/{id}/status")
   public ResponseEntity<?> updateStatus(@PathVariable Long id,
       @RequestParam String status,
@@ -99,6 +121,19 @@ public class ReservationController {
     }
 
     reservationRep.save(reservation);
+
+    User tenant = reservation.getTenant();
+    if (tenant != null && tenant.getEmail() != null) {
+      String outcome = reservation.getStatus() == ReservationStatus.ACCEPTED ? "accepted" : "rejected";
+      emailService.sendEmail(
+          tenant.getEmail(),
+          "Reservation " + outcome + " - Homely",
+          "Hello " + tenant.getFirstName() + ",\n\n" +
+              "Your reservation request for \"" + reservation.getProperty().getTitle() +
+              "\" has been " + outcome + ".\n\n" +
+              "Log in to Homely to see the details.");
+    }
+
     return ResponseEntity.ok(new ReservationView(reservation));
   }
 }

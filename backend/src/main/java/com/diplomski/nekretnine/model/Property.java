@@ -3,6 +3,7 @@ package com.diplomski.nekretnine.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "properties")
@@ -13,6 +14,8 @@ public class Property {
     private Double latitude;
 
     private Double longitude;
+
+    private LocalDateTime createdAt;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,4 +46,12 @@ public class Property {
 
     @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
     private java.util.List<PropertyImage> images = new java.util.ArrayList<>();
+
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
 }
+
+

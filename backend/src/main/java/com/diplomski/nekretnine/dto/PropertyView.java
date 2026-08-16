@@ -20,6 +20,7 @@ public class PropertyView {
   private java.util.List<String> images;
   private Double latitude;
   private Double longitude;
+  private java.time.LocalDateTime createdAt;
 
   public PropertyView(Property property) {
     this.id = property.getId();
@@ -36,5 +37,6 @@ public class PropertyView {
     this.images = property.getImages().stream().map(img -> img.getPath()).toList();
     this.latitude = property.getLatitude();
     this.longitude = property.getLongitude();
+    this.createdAt = property.getCreatedAt();
   }
 }

@@ -70,3 +70,11 @@ export const deleteProperty = async (id) => {
   });
   return { ok: response.ok };
 };
+
+export const toggleAvailability = async (id) => {
+  const response = await fetch(`http://localhost:8080/api/properties/${id}/availability`, {
+    method: "PUT",
+    headers: authHeader(),
+  });
+  return { ok: response.ok };
+};

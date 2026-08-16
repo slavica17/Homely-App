@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { getProperty } from "@/data/properties";
 import ReservationDialog from "@/components/reservation-dialog";
+import { toggleAvailability } from "@/data/properties";
 
 const Page = styled.div`
   min-height: 100vh;
@@ -84,6 +85,7 @@ const PropertyDetails = () => {
 
   const role = localStorage.getItem("role");
   const isLoggedIn = Boolean(localStorage.getItem("token"));
+  const username = localStorage.getItem("username");
 
   useEffect(() => {
     const load = async () => {
@@ -96,6 +98,14 @@ const PropertyDetails = () => {
     };
     load();
   }, [id]);
+
+  const handleToggleAvailability = async () => {
+    await toggleAvailability(property.id);
+    const result = await getProperty(id);
+    if (result.ok) {
+      setProperty(result.data);
+    }
+  };
 
   const typeLabel = (t) => {
     if (t === "STAN") return "Apartment";
@@ -188,6 +198,17 @@ const PropertyDetails = () => {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <Typography sx={{ fontSize: 28, fontWeight: 700 }}>{property.title}</Typography>
             <Chip label={typeLabel(property.type)} sx={{ backgroundColor: "#eeeeee" }} />
+            {property.ownerUsername === username && (
+            <div style={{ marginTop: 16 }}>
+              <Button
+                variant="outlined"
+                onClick={handleToggleAvailability}
+                sx={{ textTransform: "none", color: "#555555", borderColor: "#bdbdbd" }}
+              >
+                {property.available ? "Mark as unavailable" : "Mark as available"}
+              </Button>
+            </div>
+          )}
           </div>
 
           <div style={{ display: "flex", alignItems: "center", columnGap: 4, marginTop: 8, color: "#888888" }}>

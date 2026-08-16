@@ -139,4 +139,22 @@ public class PropertyController {
     return ResponseEntity.ok("Images uploaded.");
   }
 
+  @PutMapping("/{id}/availability")
+  public ResponseEntity<?> toggleAvailability(@PathVariable Long id, Authentication auth) {
+    Optional<Property> optional = propertyRep.findById(id);
+    if (optional.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Property not found.");
+    }
+    Property property = optional.get();
+
+    if (!property.getOwner().getUsername().equals(auth.getName())) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not your property.");
+    }
+
+    property.setAvailable(!property.isAvailable());
+    propertyRep.save(property);
+
+    return ResponseEntity.ok(new PropertyView(property));
+  }
+
 }
