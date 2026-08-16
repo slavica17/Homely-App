@@ -18,6 +18,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { getProperties, deleteProperty } from "@/data/properties";
 import PropertyDialog from "@/components/property-dialog";
+import { IconButton } from "@mui/material";
+import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import ProfileDialog from "@/components/profile-dialog";
+import { Avatar } from "@mui/material";
+import { getMe } from "@/data/auth";
+import PropertiesMap from "@/components/properties-map";
 
 const Page = styled.div`
   min-height: 100vh;
@@ -86,6 +92,10 @@ const Properties = () => {
   const username = localStorage.getItem("username");
   const isLoggedIn = Boolean(localStorage.getItem("token"));
 
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  const [myImage, setMyImage] = useState(null);
+
   const loadProperties = async () => {
     setLoading(true);
     const result = await getProperties();
@@ -97,6 +107,13 @@ const Properties = () => {
 
   useEffect(() => {
     loadProperties();
+    if (isLoggedIn) {
+      getMe().then((result) => {
+        if (result.ok) {
+          setMyImage(result.data.profileImage);
+        }
+      });
+    }
   }, []);
 
   const handleDelete = async (id) => {
@@ -171,6 +188,16 @@ const Properties = () => {
                 Requests
               </Button>
             )}
+
+            <IconButton onClick={() => setProfileOpen(true)}>
+              <Avatar
+                src={myImage ? "http://localhost:8080" + myImage : undefined}
+                sx={{ width: 32, height: 32 }}
+              >
+                {username ? username[0].toUpperCase() : "?"}
+              </Avatar>
+            </IconButton>
+
             <Button
               variant="outlined"
               onClick={handleLogout}
@@ -254,6 +281,11 @@ const Properties = () => {
             <MenuItem value="priceDesc">Price: high to low</MenuItem>
           </TextField>
         </Filters>
+
+        <PropertiesMap
+          properties={visibleProperties}
+          onOpen={(id) => navigate(`/properties/${id}`)}
+        />
 
         {loading ? (
           <CircularProgress />
@@ -355,6 +387,9 @@ const Properties = () => {
           onCreated={loadProperties}
         />
       )}
+
+      {profileOpen && <ProfileDialog onClose={() => setProfileOpen(false)} />}
+
     </Page>
   );
 };

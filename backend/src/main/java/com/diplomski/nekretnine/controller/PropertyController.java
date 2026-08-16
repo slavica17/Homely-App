@@ -67,6 +67,8 @@ public class PropertyController {
     property.setType(request.getType());
     property.setAvailable(true);
     property.setOwner(owner);
+    property.setLatitude(request.getLatitude());
+    property.setLongitude(request.getLongitude());
 
     propertyRep.save(property);
     return ResponseEntity.status(HttpStatus.CREATED).body(new PropertyView(property));
@@ -110,7 +112,6 @@ public class PropertyController {
     return ResponseEntity.ok("Property deleted.");
   }
 
-  // Dodavanje slika na oglas (samo vlasnik svog oglasa)
   @PostMapping("/{id}/images")
   public ResponseEntity<?> uploadImages(@PathVariable Long id,
       @RequestParam("images") MultipartFile[] files,

@@ -10,6 +10,10 @@ import lombok.Setter;
 @Setter
 public class Property {
 
+    private Double latitude;
+
+    private Double longitude;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

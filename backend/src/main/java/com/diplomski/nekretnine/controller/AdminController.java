@@ -7,6 +7,8 @@ import com.diplomski.nekretnine.repository.UserRep;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.diplomski.nekretnine.dto.PropertyView;
+import com.diplomski.nekretnine.repository.PropertyRep;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,9 +18,11 @@ import java.util.Optional;
 public class AdminController {
 
   private final UserRep userRep;
+  private final PropertyRep propertyRep;
 
-  public AdminController(UserRep userRep) {
+  public AdminController(UserRep userRep, PropertyRep propertyRep) {
     this.userRep = userRep;
+    this.propertyRep = propertyRep;
   }
 
   @GetMapping("/users")
@@ -70,4 +74,21 @@ public class AdminController {
     userRep.deleteById(id);
     return ResponseEntity.ok("User deleted.");
   }
+
+  @GetMapping("/properties")
+  public List<PropertyView> getAllProperties() {
+    return propertyRep.findAll().stream()
+        .map(PropertyView::new)
+        .toList();
+  }
+
+  @DeleteMapping("/properties/{id}")
+  public ResponseEntity<String> deleteProperty(@PathVariable Long id) {
+    if (!propertyRep.existsById(id)) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Property not found.");
+    }
+    propertyRep.deleteById(id);
+    return ResponseEntity.ok("Property deleted.");
+  }
+
 }

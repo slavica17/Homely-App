@@ -74,3 +74,62 @@ export const deleteUser = async (id) => {
   });
   return { ok: response.ok };
 };
+
+export const getMe = async () => {
+  const response = await fetch("http://localhost:8080/api/users/me", {
+    headers: authHeader(),
+  });
+  if (response.ok) {
+    return { ok: true, data: await response.json() };
+  }
+  return { ok: false, data: null };
+};
+
+export const updateProfile = async (payload) => {
+  const response = await fetch("http://localhost:8080/api/users/me", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...authHeader() },
+    body: JSON.stringify(payload),
+  });
+  const text = await response.text();
+  return { ok: response.ok, message: text };
+};
+
+export const changePassword = async (payload) => {
+  const response = await fetch("http://localhost:8080/api/users/me/password", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...authHeader() },
+    body: JSON.stringify(payload),
+  });
+  const message = await response.text();
+  return { ok: response.ok, message };
+};
+
+export const updateProfileImage = async (file) => {
+  const formData = new FormData();
+  formData.append("image", file);
+  const response = await fetch("http://localhost:8080/api/users/me/image", {
+    method: "POST",
+    headers: authHeader(),
+    body: formData,
+  });
+  return { ok: response.ok };
+};
+
+export const getAllPropertiesAdmin = async () => {
+  const response = await fetch("http://localhost:8080/api/admin/properties", {
+    headers: authHeader(),
+  });
+  if (response.ok) {
+    return { ok: true, data: await response.json() };
+  }
+  return { ok: false, data: [] };
+};
+
+export const deletePropertyAdmin = async (id) => {
+  const response = await fetch(`http://localhost:8080/api/admin/properties/${id}`, {
+    method: "DELETE",
+    headers: authHeader(),
+  });
+  return { ok: response.ok };
+};

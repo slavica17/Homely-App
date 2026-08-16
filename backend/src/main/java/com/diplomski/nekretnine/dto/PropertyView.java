@@ -18,6 +18,8 @@ public class PropertyView {
   private String ownerUsername;
   private Long ownerId;
   private java.util.List<String> images;
+  private Double latitude;
+  private Double longitude;
 
   public PropertyView(Property property) {
     this.id = property.getId();
@@ -32,5 +34,7 @@ public class PropertyView {
       this.ownerId = property.getOwner().getId();
     }
     this.images = property.getImages().stream().map(img -> img.getPath()).toList();
+    this.latitude = property.getLatitude();
+    this.longitude = property.getLongitude();
   }
 }

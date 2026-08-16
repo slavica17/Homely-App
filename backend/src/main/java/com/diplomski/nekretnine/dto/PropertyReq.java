@@ -9,6 +9,10 @@ import lombok.Setter;
 @Setter
 public class PropertyReq {
 
+    private Double latitude;
+
+    private Double longitude;
+
     @NotBlank(message = "Title is required")
     private String title;
 

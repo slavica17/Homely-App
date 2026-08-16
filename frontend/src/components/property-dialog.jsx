@@ -6,9 +6,11 @@ import {
   DialogTitle,
   MenuItem,
   TextField,
+  Typography,
 } from "@mui/material";
 import { useState } from "react";
 import { createProperty, updateProperty, uploadPropertyImages } from "@/data/properties";
+import LocationPicker from "@/components/location-picker";
 
 const PropertyDialog = ({ onClose, onCreated, existing }) => {
   const isEdit = Boolean(existing);
@@ -25,6 +27,9 @@ const PropertyDialog = ({ onClose, onCreated, existing }) => {
   const [priceError, setPriceError] = useState("");
 
   const [type, setType] = useState(existing ? existing.type : "STAN");
+
+  const [latitude, setLatitude] = useState(existing ? existing.latitude : null);
+  const [longitude, setLongitude] = useState(existing ? existing.longitude : null);
 
   const [saving, setSaving] = useState(false);
   const [images, setImages] = useState([]);
@@ -65,6 +70,8 @@ const PropertyDialog = ({ onClose, onCreated, existing }) => {
         location,
         price: Number(price),
         type,
+        latitude,
+        longitude,
       };
 
       let result;
@@ -121,6 +128,19 @@ const PropertyDialog = ({ onClose, onCreated, existing }) => {
             setLocationError("");
           }}
         />
+
+        <Typography sx={{ fontSize: 13, color: "#888888" }}>
+          Click on the map to set the location
+        </Typography>
+        <LocationPicker
+          latitude={latitude}
+          longitude={longitude}
+          onPick={(lat, lng) => {
+            setLatitude(lat);
+            setLongitude(lng);
+          }}
+        />
+
         <TextField
           label="Price (€)"
           type="number"
