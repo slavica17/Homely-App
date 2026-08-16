@@ -63,7 +63,7 @@ const Center = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 40px 0;
+  padding: 10px 0;
 `;
 
 const Card = styled.div`
@@ -183,13 +183,12 @@ const Home = () => {
         </Logo>
 
         <NavLinks>
-          <span>Home</span>
-          <span>Properties</span>
-          <span>Roommates</span>
-          <span>About</span>
+          <span onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>Home</span>
+          <span onClick={() => navigate("/properties")}>Properties</span>
+          <span onClick={() => navigate("/roommates")}>Roommates</span>
         </NavLinks>
 
-        <div style={{ width: 140 }} />
+        <div style={{ width: 100 }} />
       </NavBar>
 
       <Center>
@@ -311,6 +310,14 @@ const Home = () => {
               Sign up
             </Link>
           </Typography>
+
+          <Link
+            underline="hover"
+            onClick={() => navigate("/properties")}
+            sx={{ fontSize: 13, color: "#888888", cursor: "pointer" }}
+          >
+            Continue as a guest
+          </Link>
 
           {message && (
             <Typography sx={{ fontSize: 13, color: "#888888", textAlign: "center" }}>

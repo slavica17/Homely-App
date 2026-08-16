@@ -24,6 +24,7 @@ import {
   deletePropertyAdmin,
 } from "@/data/auth";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
+import UserDetailsDialog from "@/components/user-details-dialog";
 
 const Page = styled.div`
   min-height: 100vh;
@@ -54,7 +55,7 @@ const Content = styled.div`
 const TableWrapper = styled.div`
   background-color: #ffffff;
   overflow: hidden;
-  max-width: 1100px;
+  max-width: 1300px;
   margin: 0 auto;
 `;
 
@@ -64,6 +65,7 @@ const Admin = () => {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState(0);
   const [properties, setProperties] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const loadUsers = async () => {
     setLoading(true);
@@ -156,7 +158,7 @@ const Admin = () => {
             <CircularProgress />
           ) : (
             <TableWrapper>
-              <Table sx={{ "& td, & th": { borderColor: "#f0f0f0", px: 5 } }}>
+              <Table sx={{ "& td, & th": { borderColor: "#f0f0f0", px: 4 } }}>
                 <TableHead>
                   <TableRow sx={{ backgroundColor: "#e8e8e8" }}>
                     <TableCell sx={{ fontWeight: 700, color: "#555555" }}>Username</TableCell>
@@ -169,7 +171,11 @@ const Admin = () => {
                 </TableHead>
                 <TableBody>
                   {users.map((user) => (
-                    <TableRow key={user.id} sx={{ "&:hover": { backgroundColor: "#fafafa" } }}>
+                    <TableRow
+                      key={user.id}
+                      onClick={() => setSelectedUser(user)}
+                      sx={{ "&:hover": { backgroundColor: "#fafafa" }, cursor: "pointer" }}
+                    >
                       <TableCell>{user.username}</TableCell>
                       <TableCell>{user.firstName} {user.lastName}</TableCell>
                       <TableCell>{user.email}</TableCell>
@@ -184,17 +190,31 @@ const Admin = () => {
                         )}
                       </TableCell>
                       <TableCell align="right">
-                        {!user.approved && (
-                          <Button size="small" onClick={() => handleApprove(user.id)} sx={{ textTransform: "none", color: "#2e7d32" }}>
-                            Approve
+                        <div style={{ display: "flex", justifyContent: "flex-end", gap: 4, flexWrap: "nowrap" }}>
+                          {!user.approved && (
+                            <Button
+                              size="small"
+                              onClick={(e) => { e.stopPropagation(); handleApprove(user.id); }}
+                              sx={{ textTransform: "none", color: "#2e7d32", minWidth: 0 }}
+                            >
+                              Approve
+                            </Button>
+                          )}
+                          <Button
+                            size="small"
+                            onClick={(e) => { e.stopPropagation(); handleBlock(user.id); }}
+                            sx={{ textTransform: "none", color: "#ed6c02", minWidth: 0 }}
+                          >
+                            {user.blocked ? "Unblock" : "Block"}
                           </Button>
-                        )}
-                        <Button size="small" onClick={() => handleBlock(user.id)} sx={{ textTransform: "none", color: "#ed6c02" }}>
-                          {user.blocked ? "Unblock" : "Block"}
-                        </Button>
-                        <Button size="small" onClick={() => handleDelete(user.id)} sx={{ textTransform: "none", color: "#d32f2f" }}>
-                          Delete
-                        </Button>
+                          <Button
+                            size="small"
+                            onClick={(e) => { e.stopPropagation(); handleDelete(user.id); }}
+                            sx={{ textTransform: "none", color: "#d32f2f", minWidth: 0 }}
+                          >
+                            Delete
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -205,7 +225,7 @@ const Admin = () => {
 
         {tab === 1 && (
           <TableWrapper>
-            <Table sx={{ "& td, & th": { borderColor: "#f0f0f0", px: 5 } }}>
+            <Table sx={{ "& td, & th": { borderColor: "#f0f0f0", px: 4 } }}>
               <TableHead>
                 <TableRow sx={{ backgroundColor: "#e8e8e8" }}>
                   <TableCell sx={{ fontWeight: 700, color: "#555555" }}>Title</TableCell>
@@ -218,14 +238,22 @@ const Admin = () => {
               </TableHead>
               <TableBody>
                 {properties.map((p) => (
-                  <TableRow key={p.id} sx={{ "&:hover": { backgroundColor: "#fafafa" } }}>
+                  <TableRow
+                    key={p.id}
+                    onClick={() => navigate(`/properties/${p.id}`)}
+                    sx={{ "&:hover": { backgroundColor: "#fafafa" }, cursor: "pointer" }}
+                  >
                     <TableCell>{p.title}</TableCell>
                     <TableCell>{p.location}</TableCell>
                     <TableCell>€{p.price}</TableCell>
                     <TableCell>{p.type}</TableCell>
                     <TableCell>{p.ownerUsername}</TableCell>
                     <TableCell align="right">
-                      <Button size="small" onClick={() => handleDeleteProperty(p.id)} sx={{ textTransform: "none", color: "#d32f2f" }}>
+                      <Button
+                        size="small"
+                        onClick={(e) => { e.stopPropagation(); handleDeleteProperty(p.id); }}
+                        sx={{ textTransform: "none", color: "#d32f2f" }}
+                      >
                         Remove
                       </Button>
                     </TableCell>
@@ -236,6 +264,16 @@ const Admin = () => {
           </TableWrapper>
         )}
       </Content>
+
+      {selectedUser && (
+        <UserDetailsDialog
+          user={selectedUser}
+          onClose={() => setSelectedUser(null)}
+          onApprove={async (id) => { await handleApprove(id); setSelectedUser(null); }}
+          onBlock={async (id) => { await handleBlock(id); setSelectedUser(null); }}
+          onDelete={async (id) => { await handleDelete(id); setSelectedUser(null); }}
+        />
+      )}
     </Page>
   );
 };

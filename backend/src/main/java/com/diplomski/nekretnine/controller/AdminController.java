@@ -11,6 +11,7 @@ import com.diplomski.nekretnine.dto.PropertyView;
 import com.diplomski.nekretnine.repository.PropertyRep;
 import com.diplomski.nekretnine.service.EmailService;
 import com.diplomski.nekretnine.model.Property;
+import com.diplomski.nekretnine.repository.ReservationRep;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,11 +23,14 @@ public class AdminController {
   private final UserRep userRep;
   private final PropertyRep propertyRep;
   private final EmailService emailService;
+  private final ReservationRep reservationRep;
 
-  public AdminController(UserRep userRep, PropertyRep propertyRep, EmailService emailService) {
+  public AdminController(UserRep userRep, PropertyRep propertyRep,
+      EmailService emailService, ReservationRep reservationRep) {
     this.userRep = userRep;
     this.propertyRep = propertyRep;
     this.emailService = emailService;
+    this.reservationRep = reservationRep;
   }
 
   @GetMapping("/users")
@@ -95,6 +99,7 @@ public class AdminController {
   }
 
   @DeleteMapping("/properties/{id}")
+  @org.springframework.transaction.annotation.Transactional
   public ResponseEntity<String> deleteProperty(@PathVariable Long id) {
     Optional<Property> optional = propertyRep.findById(id);
     if (optional.isEmpty()) {
@@ -102,7 +107,6 @@ public class AdminController {
     }
     Property property = optional.get();
 
-    // mejl vlasniku pre uklanjanja oglasa
     User owner = property.getOwner();
     if (owner != null && owner.getEmail() != null) {
       emailService.sendEmail(
@@ -113,7 +117,28 @@ public class AdminController {
               "\" has been removed by an administrator.");
     }
 
+    java.util.List<com.diplomski.nekretnine.model.Reservation> reservations = reservationRep.findByPropertyOwner(owner)
+        .stream()
+        .filter(r -> r.getProperty().getId().equals(id))
+        .toList();
+
+    for (com.diplomski.nekretnine.model.Reservation r : reservations) {
+      User t = r.getTenant();
+      if (t != null && t.getEmail() != null) {
+        emailService.sendEmail(
+            t.getEmail(),
+            "Reservation cancelled - Homely",
+            "Hello " + t.getFirstName() + ",\n\n" +
+                "The property \"" + property.getTitle() +
+                "\" you reserved has been removed by an administrator, " +
+                "so your reservation has been cancelled.\n\n" +
+                "We apologize for the inconvenience.");
+      }
+    }
+
+    reservationRep.deleteByProperty(property);
     propertyRep.deleteById(id);
+
     return ResponseEntity.ok("Property deleted.");
   }
 
