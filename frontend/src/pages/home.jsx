@@ -161,7 +161,7 @@ const Home = () => {
         setMessage(result.message);
       }
     } catch {
-      setMessage("Greška u konekciji sa serverom.");
+      setMessage("Server connection error.");
     } finally {
       setLoading(false);
     }

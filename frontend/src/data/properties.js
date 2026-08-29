@@ -37,8 +37,7 @@ export const updateProperty = async (id, property) => {
   const response = await fetch(`http://localhost:8080/api/properties/${id}`, {
     method: "PUT",
     headers: {
-      "Content-Type": "application/json",
-      ...authHeader(),
+      "Content-Type": "application/json", ...authHeader(),
     },
     body: JSON.stringify(property),
   });

@@ -32,17 +32,13 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/uploads/**").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/properties/**").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/roommates/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated())
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/api/auth/**", "/uploads/**").permitAll()
+            .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/properties/**").permitAll().requestMatchers(org.springframework.http.HttpMethod.GET, "/api/roommates/**").permitAll().requestMatchers("/api/admin/**").hasRole("ADMIN")
+            .anyRequest().authenticated()).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

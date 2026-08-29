@@ -29,7 +29,7 @@ public class AuthController {
     private final FileStorageService fileStorageService;
 
     public AuthController(UserRep userRep, PasswordEncoder passwordEncoder,
-            JwtUtil jwtUtil, FileStorageService fileStorageService) {
+        JwtUtil jwtUtil, FileStorageService fileStorageService) {
         this.userRep = userRep;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
@@ -72,7 +72,7 @@ public class AuthController {
         userRep.save(user);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body("Registration successful! Your account is waiting for administrator approval.");
+            .body("Registration successful! Your account is waiting for administrator approval.");
     }
 
     @PostMapping("/login")
@@ -95,7 +95,7 @@ public class AuthController {
 
         if (!user.isApproved()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Your account is waiting for administrator approval.");
+                .body("Your account is waiting for administrator approval.");
         }
 
         String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());

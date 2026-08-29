@@ -36,7 +36,6 @@ public class ReservationController {
     this.emailService = emailService;
   }
 
-  // Stanar šalje zahtev za rezervaciju
   @PostMapping
   public ResponseEntity<?> create(@Valid @RequestBody ReservationReq request, Authentication auth) {
     User tenant = userRep.findByUsername(auth.getName()).orElse(null);
@@ -63,7 +62,6 @@ public class ReservationController {
 
     reservationRep.save(reservation);
 
-    // mejl vlasniku da je stigao novi zahtev
     User owner = property.getOwner();
     if (owner != null && owner.getEmail() != null) {
       emailService.sendEmail(
@@ -79,7 +77,6 @@ public class ReservationController {
     return ResponseEntity.status(HttpStatus.CREATED).body(new ReservationView(reservation));
   }
 
-  // Moje rezervacije (stanar)
   @GetMapping("/my")
   public List<ReservationView> myReservations(Authentication auth) {
     User tenant = userRep.findByUsername(auth.getName()).orElseThrow();
@@ -88,7 +85,6 @@ public class ReservationController {
         .toList();
   }
 
-  // Zahtevi koji su stigli meni (vlasnik)
   @GetMapping("/received")
   public List<ReservationView> receivedReservations(Authentication auth) {
     User owner = userRep.findByUsername(auth.getName()).orElseThrow();
@@ -97,11 +93,9 @@ public class ReservationController {
         .toList();
   }
 
-  // Vlasnik prihvata/odbija
   @PutMapping("/{id}/status")
   public ResponseEntity<?> updateStatus(@PathVariable Long id,
-      @RequestParam String status,
-      Authentication auth) {
+      @RequestParam String status, Authentication auth) {
     Optional<Reservation> optional = reservationRep.findById(id);
     if (optional.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Reservation not found.");

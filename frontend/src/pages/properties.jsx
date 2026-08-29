@@ -19,7 +19,6 @@ import { useNavigate } from "react-router";
 import { getProperties, deleteProperty } from "@/data/properties";
 import PropertyDialog from "@/components/property-dialog";
 import { IconButton } from "@mui/material";
-import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import ProfileDialog from "@/components/profile-dialog";
 import { Avatar } from "@mui/material";
 import { getMe } from "@/data/auth";

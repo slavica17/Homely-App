@@ -12,6 +12,7 @@ import com.diplomski.nekretnine.repository.PropertyRep;
 import com.diplomski.nekretnine.service.EmailService;
 import com.diplomski.nekretnine.model.Property;
 import com.diplomski.nekretnine.repository.ReservationRep;
+import com.diplomski.nekretnine.model.Reservation;
 
 import java.util.List;
 import java.util.Optional;
@@ -117,12 +118,12 @@ public class AdminController {
               "\" has been removed by an administrator.");
     }
 
-    java.util.List<com.diplomski.nekretnine.model.Reservation> reservations = reservationRep.findByPropertyOwner(owner)
+    List<Reservation> reservations = reservationRep.findByPropertyOwner(owner)
         .stream()
         .filter(r -> r.getProperty().getId().equals(id))
         .toList();
 
-    for (com.diplomski.nekretnine.model.Reservation r : reservations) {
+    for (Reservation r : reservations) {
       User t = r.getTenant();
       if (t != null && t.getEmail() != null) {
         emailService.sendEmail(

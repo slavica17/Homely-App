@@ -23,8 +23,7 @@ export const createRoommateAd = async (ad) => {
   const response = await fetch("http://localhost:8080/api/roommates", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
-      ...authHeader(),
+      "Content-Type": "application/json", ...authHeader(),
     },
     body: JSON.stringify(ad),
   });

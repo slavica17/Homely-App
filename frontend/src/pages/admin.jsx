@@ -127,7 +127,7 @@ const Admin = () => {
       <NavBar>
         <Logo>
           <HomeOutlinedIcon sx={{ color: "#555555" }} />
-          Homely — Admin
+          Homely - Admin
         </Logo>
         <Button
           variant="outlined"

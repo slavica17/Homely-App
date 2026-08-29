@@ -7,8 +7,7 @@ export const createReservation = async (reservation) => {
   const response = await fetch("http://localhost:8080/api/reservations", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
-      ...authHeader(),
+      "Content-Type": "application/json", ...authHeader(),
     },
     body: JSON.stringify(reservation),
   });

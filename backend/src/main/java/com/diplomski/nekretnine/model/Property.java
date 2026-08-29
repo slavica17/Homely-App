@@ -4,18 +4,14 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "properties")
 @Getter
 @Setter
 public class Property {
-
-    private Double latitude;
-
-    private Double longitude;
-
-    private LocalDateTime createdAt;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,8 +40,14 @@ public class Property {
     @JoinColumn(name = "owner_id")
     private User owner;
 
+    private Double latitude;
+
+    private Double longitude;
+
+    private LocalDateTime createdAt;
+
     @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
-    private java.util.List<PropertyImage> images = new java.util.ArrayList<>();
+    private List<PropertyImage> images = new ArrayList<>();
 
     @PrePersist
     public void onCreate() {
@@ -53,5 +55,3 @@ public class Property {
     }
 
 }
-
-

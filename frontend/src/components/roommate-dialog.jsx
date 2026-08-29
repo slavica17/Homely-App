@@ -115,7 +115,7 @@ const RoommateDialog = ({ onClose, onCreated }) => {
           }}
         />
         <TextField
-          label="Price (€) — optional"
+          label="Price (€) - optional"
           type="number"
           value={price}
           size="small"

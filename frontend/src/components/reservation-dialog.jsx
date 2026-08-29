@@ -42,11 +42,12 @@ const ReservationDialog = ({ propertyId, propertyTitle, onClose }) => {
 
   return (
     <Dialog open onClose={onClose}>
-      <DialogTitle>Reserve — {propertyTitle}</DialogTitle>
+      <DialogTitle>Reserve - {propertyTitle}</DialogTitle>
       <DialogContent sx={{ width: 360, display: "flex", flexDirection: "column", rowGap: 2, mt: 1 }}>
         <TextField
           label="Start date"
           type="date"
+          sx={{mt: 1}}
           value={startDate}
           size="small"
           slotProps={{ inputLabel: { shrink: true } }}

@@ -21,7 +21,7 @@ public class PropertyView {
   private Double latitude;
   private Double longitude;
   private java.time.LocalDateTime createdAt;
-
+  
   public PropertyView(Property property) {
     this.id = property.getId();
     this.title = property.getTitle();

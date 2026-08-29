@@ -74,27 +74,29 @@ public class PropertyController {
     return ResponseEntity.status(HttpStatus.CREATED).body(new PropertyView(property));
   }
 
-  @PutMapping("/{id}")
-  public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody PropertyReq request, Authentication auth) {
-    Optional<Property> optional = propertyRep.findById(id);
-    if (optional.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Property not found.");
+ @PutMapping("/{id}")
+    public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody PropertyReq request, Authentication auth) {
+        Optional<Property> optional = propertyRep.findById(id);
+        if (optional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Property not found.");
+        }
+        Property property = optional.get();
+
+        if (!property.getOwner().getUsername().equals(auth.getName())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can only edit your own properties.");
+        }
+
+        property.setTitle(request.getTitle());
+        property.setDescription(request.getDescription());
+        property.setLocation(request.getLocation());
+        property.setPrice(request.getPrice());
+        property.setType(request.getType());
+        property.setLatitude(request.getLatitude());
+        property.setLongitude(request.getLongitude());
+
+        propertyRep.save(property);
+        return ResponseEntity.ok(new PropertyView(property));
     }
-    Property property = optional.get();
-
-    if (!property.getOwner().getUsername().equals(auth.getName())) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can only edit your own properties.");
-    }
-
-    property.setTitle(request.getTitle());
-    property.setDescription(request.getDescription());
-    property.setLocation(request.getLocation());
-    property.setPrice(request.getPrice());
-    property.setType(request.getType());
-
-    propertyRep.save(property);
-    return ResponseEntity.ok(new PropertyView(property));
-  }
 
   @DeleteMapping("/{id}")
   public ResponseEntity<?> delete(@PathVariable Long id, Authentication auth) {
